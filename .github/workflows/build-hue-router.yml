@@ -23,11 +23,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     container:
-      image: ghcr.io/nerivec/ti-firmware-builder:c15a839f3e4e14cf
+      image: ghcr.io/nerivec/ti-firmware-builder:c15a839f3e4e14cf@sha256:6d2f0d8477fedde724798919d06a0e8ccd02d57d42c2f303ce60bb6cca05270e
 
     steps:
       - name: Check out firmware patches
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Trust the mounted checkout
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
@@ -36,7 +36,7 @@ jobs:
         run: bash .github/scripts/build-hue-router.sh
 
       - name: Upload flashable Intel HEX firmware
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sonoff-zbdongle-p-hue-router
           path: dist/sonoff_zbdongle_p_hue_on_off_light_router.hex
