@@ -3,6 +3,9 @@
 ## What firmware to pick for my device?
 Same logic as the coordinator firmware applies. See [README.md of the coordinator firmware](../../coordinator/Z-Stack_3.x.0/README.md).
 
+For the Sonoff ZBDongle-P target that presents as an On/Off Light and can join
+an official Philips Hue Bridge v2, see [HUE_ROUTER.md](HUE_ROUTER.md).
+
 ## Pairing
 After reflashing the router will automatically pair.
 

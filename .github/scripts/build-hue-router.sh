@@ -14,6 +14,15 @@ HUE_TCLK_CONFIGURER="${REPO_ROOT}/.github/scripts/configure-hue-tclk.py"
 SYSCFG_OVERLAY="${REPO_ROOT}/router/Z-Stack_3.x.0/sonoff_zbdongle_p.syscfg.js"
 HEX_VALIDATOR="${REPO_ROOT}/.github/scripts/validate_intel_hex.py"
 DIST="${REPO_ROOT}/dist"
+VARIANT="${HUE_ROUTER_VARIANT:-production}"
+
+case "${VARIANT}" in
+  production|debug) ;;
+  *)
+    echo "HUE_ROUTER_VARIANT must be 'production' or 'debug'" >&2
+    exit 2
+    ;;
+esac
 
 for required in "${SDK}" "${CCS}" "${COMPILER}/bin/tiarmobjcopy" \
                 "${BASE_PATCH}" "${HUE_PATCH}" "${HUE_INSTRUMENTER}" \
@@ -69,16 +78,27 @@ BASE_INCLUDES=(
   git apply --ignore-space-change "${HUE_PATCH}"
 )
 
-python3 "${HUE_INSTRUMENTER}" \
-  "${STAGE_PROJECT}/Application/zcl_genericapp.c"
+if [[ "${VARIANT}" == "debug" ]]; then
+  python3 "${HUE_INSTRUMENTER}" \
+    "${STAGE_PROJECT}/Application/zcl_genericapp.c"
+fi
 python3 "${HUE_TCLK_CONFIGURER}" \
   "${STAGE_PROJECT}/Stack/Config/preinclude.h"
 
 grep -q "ZCL_DEVICEID_ON_OFF_LIGHT" "${STAGE_PROJECT}/Application/zcl_genericapp_data.c"
 grep -q "GENERICAPP_DEVICE_VERSION     1" "${STAGE_PROJECT}/Application/zcl_genericapp_data.c"
 grep -q "zclGenericApp_OnOffCB" "${STAGE_PROJECT}/Application/zcl_genericapp.c"
-grep -q "20260904-debug2" "${STAGE_PROJECT}/Application/zcl_genericapp.c"
-grep -q "DEFAULT_TC_LINK_KEY" "${STAGE_PROJECT}/Stack/Config/preinclude.h"
+grep -q "zstack_UseAPSKeyWithFallback" "${STAGE_PROJECT}/Application/zcl_genericapp.c"
+grep -q "HUE_TCLK_KEY" "${STAGE_PROJECT}/Stack/Config/preinclude.h"
+if [[ "${VARIANT}" == "debug" ]]; then
+  grep -q "20260904-debug2" "${STAGE_PROJECT}/Application/zcl_genericapp.c"
+  grep -q "commissioning key setup status" "${STAGE_PROJECT}/Application/zcl_genericapp.c"
+else
+  if grep -q "hueLogDisplay\|20260904-debug2" "${STAGE_PROJECT}/Application/zcl_genericapp.c"; then
+    echo "Production source unexpectedly contains USB diagnostics" >&2
+    exit 1
+  fi
+fi
 
 install -m 0644 "${STAGE_PROJECT}/Application/zcl_genericapp.c" "${SDK}/source/ti/zstack/apps/genericapp/zcl_genericapp.c"
 install -m 0644 "${STAGE_PROJECT}/Application/zcl_genericapp.h" "${SDK}/source/ti/zstack/apps/genericapp/zcl_genericapp.h"
@@ -131,7 +151,7 @@ if [[ -z "${OUT_FILE}" ]]; then
 fi
 
 mkdir -p "${DIST}"
-HEX_FILE="${DIST}/sonoff_zbdongle_p_hue_on_off_light_router_debug.hex"
+HEX_FILE="${DIST}/sonoff_zbdongle_p_hue_on_off_light_router_${VARIANT}.hex"
 "${COMPILER}/bin/tiarmobjcopy" "${OUT_FILE}" --output-target ihex "${HEX_FILE}"
 
 python3 "${HEX_VALIDATOR}" "${HEX_FILE}" \

@@ -311,6 +311,17 @@
  
    // Register the Application to receive the unprocessed Foundation command/response messages
    zclport_registerZclHandleExternal(GENERICAPP_ENDPOINT, zclGenericApp_ProcessIncomingMsg);
+@@ -419,2 +427,9 @@
+-  //Setup ZDO callbacks
++  // Hue uses the ZLL commissioning TCLK. Retain ZigBeeAlliance09 as fallback.
++  uint8_t hueCommissioningKey[16] = HUE_TCLK_KEY;
++  zstack_bdbSetActiveCentralizedLinkKeyReq_t hueKeyReq;
++  hueKeyReq.zstack_CentralizedLinkKeyModes = zstack_UseAPSKeyWithFallback;
++  hueKeyReq.pKey = hueCommissioningKey;
++  (void)Zstackapi_bdbSetActiveCentralizedLinkKeyReq(appServiceTaskId, &hueKeyReq);
++
++  //Setup ZDO callbacks
+   SetupZStackCallbacks();
 @@ -968,6 +976,177 @@
  
  }

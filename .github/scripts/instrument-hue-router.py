@@ -140,6 +140,22 @@ static const char *hueDeviceStateName(zstack_DevState state)
 
     source = replace_once(
         source,
+        '''  (void)Zstackapi_bdbSetActiveCentralizedLinkKeyReq(appServiceTaskId, &hueKeyReq);
+''',
+        '''  zstack_ZStatusValues hueKeyStatus =
+      Zstackapi_bdbSetActiveCentralizedLinkKeyReq(appServiceTaskId, &hueKeyReq);
+  if (hueLogDisplay != NULL)
+  {
+    Display_printf(hueLogDisplay, 0, 0,
+                   "[HUE] commissioning key setup status=%u default-key-fallback=1",
+                   hueKeyStatus);
+  }
+''',
+        "commissioning key result diagnostics",
+    )
+
+    source = replace_once(
+        source,
         '''  zstack_bdbStartCommissioningReq_t zstack_bdbStartCommissioningReq;
   zstack_bdbStartCommissioningReq.commissioning_mode = 0;
 ''',

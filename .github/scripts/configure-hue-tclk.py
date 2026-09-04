@@ -19,6 +19,7 @@ EXPECTED_TEXT_FINGERPRINT = (
     "ce574642a3a8959b344796591321a155ae3bd25e4f5668602f6a33c06adbdf33"
 )
 HEADER_GUARD_END = "#endif /* HUE_ROUTER_PREINCLUDE_H_ */"
+KEY_MACRO = "HUE_TCLK_KEY"
 
 
 def main() -> int:
@@ -52,14 +53,14 @@ def main() -> int:
         print(f"Could not find the preinclude header guard in {header_path}", file=sys.stderr)
         return 2
 
-    if "DEFAULT_TC_LINK_KEY" in header:
-        print(f"DEFAULT_TC_LINK_KEY is already defined in {header_path}", file=sys.stderr)
+    if KEY_MACRO in header:
+        print(f"{KEY_MACRO} is already defined in {header_path}", file=sys.stderr)
         return 2
 
     initializer = ",".join(f"0x{byte:02x}" for byte in key_bytes)
     key_define = (
         "// Hue Bridge classical commissioning uses the ZLL pre-installed TCLK.\n"
-        f"#define DEFAULT_TC_LINK_KEY {{{initializer}}}\n\n"
+        f"#define {KEY_MACRO} {{{initializer}}}\n\n"
     )
     header = header.replace(HEADER_GUARD_END, key_define + HEADER_GUARD_END)
     header_path.write_text(header, encoding="utf-8", newline="\n")

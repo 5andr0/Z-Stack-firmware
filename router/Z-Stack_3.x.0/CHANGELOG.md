@@ -1,3 +1,12 @@
+# 20260904 (Hue-compatible Sonoff ZBDongle-P target)
+
+- Present GenericApp as an HA On/Off Light while retaining the router role
+- Add Basic, Identify, Groups, Scenes, and On/Off server support
+- Use the Hue/ZLL commissioning trust-center key with the standard global key
+  as fallback
+- Set the Simple Descriptor application device version to 1
+- Add separate production and USB-debug GitHub Actions builds
+
 # 20250403
 
 - Updated SimpleLink SDK to 8.30.01.01
