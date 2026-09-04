@@ -1,0 +1,44 @@
+name: Build Sonoff Hue router firmware
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/hue-router-firmware
+    paths:
+      - .github/scripts/build-hue-router.sh
+      - .github/scripts/validate_intel_hex.py
+      - .github/workflows/build-hue-router.yml
+      - router/Z-Stack_3.x.0/firmware.patch
+      - router/Z-Stack_3.x.0/hue_on_off_light.patch
+      - router/Z-Stack_3.x.0/sonoff_zbdongle_p.syscfg.js
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  build:
+    name: CC2652P Hue On/Off Light router
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container:
+      image: ghcr.io/nerivec/ti-firmware-builder:c15a839f3e4e14cf
+
+    steps:
+      - name: Check out firmware patches
+        uses: actions/checkout@v4
+
+      - name: Trust the mounted checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Build with SimpleLink SDK 8.30.01.01
+        run: bash .github/scripts/build-hue-router.sh
+
+      - name: Upload flashable Intel HEX firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonoff-zbdongle-p-hue-router
+          path: dist/sonoff_zbdongle_p_hue_on_off_light_router.hex
+          if-no-files-found: error
+          retention-days: 90
