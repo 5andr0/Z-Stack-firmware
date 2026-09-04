@@ -9,12 +9,14 @@ WORKSPACE="${HUE_ROUTER_WORKSPACE:-${SDK}/hue-router-workspace}"
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 BASE_PATCH="${REPO_ROOT}/router/Z-Stack_3.x.0/firmware.patch"
 HUE_PATCH="${REPO_ROOT}/router/Z-Stack_3.x.0/hue_on_off_light.patch"
+HUE_INSTRUMENTER="${REPO_ROOT}/.github/scripts/instrument-hue-router.py"
 SYSCFG_OVERLAY="${REPO_ROOT}/router/Z-Stack_3.x.0/sonoff_zbdongle_p.syscfg.js"
 HEX_VALIDATOR="${REPO_ROOT}/.github/scripts/validate_intel_hex.py"
 DIST="${REPO_ROOT}/dist"
 
 for required in "${SDK}" "${CCS}" "${COMPILER}/bin/tiarmobjcopy" \
-                "${BASE_PATCH}" "${HUE_PATCH}" "${SYSCFG_OVERLAY}" \
+                "${BASE_PATCH}" "${HUE_PATCH}" "${HUE_INSTRUMENTER}" \
+                "${SYSCFG_OVERLAY}" \
                 "${HEX_VALIDATOR}"; do
   if [[ ! -e "${required}" ]]; then
     echo "Required build input is missing: ${required}" >&2
@@ -65,8 +67,12 @@ BASE_INCLUDES=(
   git apply --ignore-space-change "${HUE_PATCH}"
 )
 
+python3 "${HUE_INSTRUMENTER}" \
+  "${STAGE_PROJECT}/Application/zcl_genericapp.c"
+
 grep -q "ZCL_DEVICEID_ON_OFF_LIGHT" "${STAGE_PROJECT}/Application/zcl_genericapp_data.c"
 grep -q "zclGenericApp_OnOffCB" "${STAGE_PROJECT}/Application/zcl_genericapp.c"
+grep -q "20260904-debug1" "${STAGE_PROJECT}/Application/zcl_genericapp.c"
 
 install -m 0644 "${STAGE_PROJECT}/Application/zcl_genericapp.c" "${SDK}/source/ti/zstack/apps/genericapp/zcl_genericapp.c"
 install -m 0644 "${STAGE_PROJECT}/Application/zcl_genericapp.h" "${SDK}/source/ti/zstack/apps/genericapp/zcl_genericapp.h"
@@ -119,7 +125,7 @@ if [[ -z "${OUT_FILE}" ]]; then
 fi
 
 mkdir -p "${DIST}"
-HEX_FILE="${DIST}/sonoff_zbdongle_p_hue_on_off_light_router.hex"
+HEX_FILE="${DIST}/sonoff_zbdongle_p_hue_on_off_light_router_debug.hex"
 "${COMPILER}/bin/tiarmobjcopy" "${OUT_FILE}" --output-target ihex "${HEX_FILE}"
 
 python3 "${HEX_VALIDATOR}" "${HEX_FILE}" \
