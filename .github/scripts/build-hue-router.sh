@@ -10,12 +10,14 @@ REPO_ROOT="$(git rev-parse --show-toplevel)"
 BASE_PATCH="${REPO_ROOT}/router/Z-Stack_3.x.0/firmware.patch"
 HUE_PATCH="${REPO_ROOT}/router/Z-Stack_3.x.0/hue_on_off_light.patch"
 HUE_INSTRUMENTER="${REPO_ROOT}/.github/scripts/instrument-hue-router.py"
+HUE_TCLK_CONFIGURER="${REPO_ROOT}/.github/scripts/configure-hue-tclk.py"
 SYSCFG_OVERLAY="${REPO_ROOT}/router/Z-Stack_3.x.0/sonoff_zbdongle_p.syscfg.js"
 HEX_VALIDATOR="${REPO_ROOT}/.github/scripts/validate_intel_hex.py"
 DIST="${REPO_ROOT}/dist"
 
 for required in "${SDK}" "${CCS}" "${COMPILER}/bin/tiarmobjcopy" \
                 "${BASE_PATCH}" "${HUE_PATCH}" "${HUE_INSTRUMENTER}" \
+                "${HUE_TCLK_CONFIGURER}" \
                 "${SYSCFG_OVERLAY}" \
                 "${HEX_VALIDATOR}"; do
   if [[ ! -e "${required}" ]]; then
@@ -69,10 +71,14 @@ BASE_INCLUDES=(
 
 python3 "${HUE_INSTRUMENTER}" \
   "${STAGE_PROJECT}/Application/zcl_genericapp.c"
+python3 "${HUE_TCLK_CONFIGURER}" \
+  "${STAGE_PROJECT}/Stack/Config/preinclude.h"
 
 grep -q "ZCL_DEVICEID_ON_OFF_LIGHT" "${STAGE_PROJECT}/Application/zcl_genericapp_data.c"
+grep -q "GENERICAPP_DEVICE_VERSION     1" "${STAGE_PROJECT}/Application/zcl_genericapp_data.c"
 grep -q "zclGenericApp_OnOffCB" "${STAGE_PROJECT}/Application/zcl_genericapp.c"
-grep -q "20260904-debug1" "${STAGE_PROJECT}/Application/zcl_genericapp.c"
+grep -q "20260904-debug2" "${STAGE_PROJECT}/Application/zcl_genericapp.c"
+grep -q "DEFAULT_TC_LINK_KEY" "${STAGE_PROJECT}/Stack/Config/preinclude.h"
 
 install -m 0644 "${STAGE_PROJECT}/Application/zcl_genericapp.c" "${SDK}/source/ti/zstack/apps/genericapp/zcl_genericapp.c"
 install -m 0644 "${STAGE_PROJECT}/Application/zcl_genericapp.h" "${SDK}/source/ti/zstack/apps/genericapp/zcl_genericapp.h"

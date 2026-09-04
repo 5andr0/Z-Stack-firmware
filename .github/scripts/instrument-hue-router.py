@@ -126,9 +126,11 @@ static const char *hueDeviceStateName(zstack_DevState state)
     if (hueLogDisplay != NULL)
     {
         Display_printf(hueLogDisplay, 0, 0,
-                       "[HUE] boot: serial=115200 8N1 firmware=20260904-debug1");
+                       "[HUE] boot: serial=115200 8N1 firmware=20260904-debug2");
         Display_printf(hueLogDisplay, 0, 0,
-                       "[HUE] endpoint=1 profile=0x0104 device=0x0100 router=1");
+                       "[HUE] endpoint=1 profile=0x0104 device=0x0100 version=1 router=1");
+        Display_printf(hueLogDisplay, 0, 0,
+                       "[HUE] commissioning key: Hue/ZLL trust-center key enabled");
     }
 
     /* Initialize btns */
@@ -282,7 +284,7 @@ static void zclGenericApp_scheduleSteeringRetry(void)
             if (hueLogDisplay != NULL)
             {
               Display_printf(hueLogDisplay, 0, 0,
-                             "[HUE] network[%u]: pan=0x%04X channel=%u join-capacity=%u lqi=%u",
+                             "[HUE] network[%u]: pan=0x%x channel=%u join-capacity=%u lqi=%u",
                              index, pNwk->panId, pNwk->logicalChannel,
                              pNwk->routerCapacity, pNwk->chosenRouterLinkQuality);
             }
@@ -324,7 +326,7 @@ static void zclGenericApp_scheduleSteeringRetry(void)
               if (hueLogDisplay != NULL)
               {
                 Display_printf(hueLogDisplay, 0, 0,
-                               "[HUE] JOINED: pan=0x%04X channel=%u short=0x%04X",
+                               "[HUE] JOINED: pan=0x%x channel=%u short=0x%x",
                                rsp.panId, rsp.logicalChannel, rsp.nwkAddr);
               }
             }
@@ -354,14 +356,14 @@ static void zclGenericApp_scheduleSteeringRetry(void)
     if (hueLogDisplay != NULL)
     {
         Display_printf(hueLogDisplay, 0, 0,
-                       "[HUE] AF RX: src=0x%04X srcEp=%u dstEp=%u cluster=0x%04X len=%u rssi=%d lqi=%u",
+                       "[HUE] AF RX: src=0x%x srcEp=%u dstEp=%u cluster=0x%x len=%u rssi=%d lqi=%u",
                        srcAddr, pInMsg->srcAddr.endpoint, pInMsg->endpoint,
                        pInMsg->clusterId, pInMsg->n_payload, pInMsg->rssi,
                        pInMsg->linkQuality);
         if ((pInMsg->pPayload != NULL) && (pInMsg->n_payload >= 3))
         {
             Display_printf(hueLogDisplay, 0, 0,
-                           "[HUE] AF bytes: %02X %02X %02X %02X %02X",
+                           "[HUE] AF bytes: %x %x %x %x %x",
                            pInMsg->pPayload[0], pInMsg->pPayload[1],
                            pInMsg->pPayload[2],
                            pInMsg->n_payload > 3 ? pInMsg->pPayload[3] : 0,
@@ -385,7 +387,7 @@ static void zclGenericApp_scheduleSteeringRetry(void)
   if (hueLogDisplay != NULL)
   {
     Display_printf(hueLogDisplay, 0, 0,
-                   "[HUE] BDB: mode=%s(%u) status=%s(%u) remaining=0x%02X",
+                   "[HUE] BDB: mode=%s(%u) status=%s(%u) remaining=0x%x",
                    hueBdbModeName(bdbCommissioningModeMsg->bdbCommissioningMode),
                    bdbCommissioningModeMsg->bdbCommissioningMode,
                    hueBdbStatusName(bdbCommissioningModeMsg->bdbCommissioningStatus),
@@ -502,7 +504,7 @@ static void zclGenericApp_scheduleSteeringRetry(void)
   if (hueLogDisplay != NULL)
   {
     Display_printf(hueLogDisplay, 0, 0,
-                   "[HUE] ZCL external: cluster=0x%04X cmd=0x%02X seq=%u data=%u",
+                   "[HUE] ZCL external: cluster=0x%x cmd=0x%x seq=%u data=%u",
                    pInMsg->msg->clusterId, pInMsg->hdr.commandID,
                    pInMsg->hdr.transSeqNum, pInMsg->pDataLen);
   }

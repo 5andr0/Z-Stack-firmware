@@ -37,6 +37,10 @@
  /*********************************************************************
 --- a/zr_genericapp_CC1352P_2_LAUNCHXL_tirtos7_ticlang/Application/zcl_genericapp_data.c
 +++ b/zr_genericapp_CC1352P_2_LAUNCHXL_tirtos7_ticlang/Application/zcl_genericapp_data.c
+@@ -73,2 +73,2 @@
+-#define GENERICAPP_DEVICE_VERSION     0
++#define GENERICAPP_DEVICE_VERSION     1
+ #define GENERICAPP_FLAGS              0
 @@ -93,13 +93,16 @@
  #ifdef ZCL_IDENTIFY
  const uint16_t zclGenericApp_identify_clusterRevision = 0x0001;

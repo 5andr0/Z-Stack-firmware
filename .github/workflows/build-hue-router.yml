@@ -7,6 +7,7 @@ on:
       - codex/hue-router-firmware
     paths:
       - .github/scripts/build-hue-router.sh
+      - .github/scripts/configure-hue-tclk.py
       - .github/scripts/instrument-hue-router.py
       - .github/scripts/validate_intel_hex.py
       - .github/workflows/build-hue-router.yml
@@ -34,6 +35,8 @@ jobs:
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Build with SimpleLink SDK 8.30.01.01
+        env:
+          HUE_TCLK_HEX: ${{ secrets.HUE_TCLK_HEX }}
         run: bash .github/scripts/build-hue-router.sh
 
       - name: Upload flashable Intel HEX firmware

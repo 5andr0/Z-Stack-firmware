@@ -9,6 +9,12 @@ clusters. Groups, scenes, On, Off, and Toggle commands are handled so that the
 device has the standard shape expected by a Hue Bridge while continuing to
 route Zigbee traffic at the network layer.
 
+Hue classical commissioning encrypts the initial network-key transport with
+the ZLL pre-installed trust-center link key rather than `ZigBeeAlliance09`.
+The workflow reads this key from the `HUE_TCLK_HEX` repository secret, verifies
+its published SHA-256 fingerprint, and compiles it as `DEFAULT_TC_LINK_KEY`.
+The key itself is deliberately not stored in the public repository.
+
 ## Build
 
 Run the **Build Sonoff Hue router firmware** GitHub Actions workflow. Its
